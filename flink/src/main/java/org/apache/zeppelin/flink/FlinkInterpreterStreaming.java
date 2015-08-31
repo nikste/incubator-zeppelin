@@ -17,6 +17,22 @@
  */
 package org.apache.zeppelin.flink;
 
+import org.apache.flink.api.scala.FlinkILoop;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.runtime.StreamingMode;
+import org.apache.flink.runtime.minicluster.LocalFlinkMiniCluster;
+import org.apache.zeppelin.interpreter.*;
+import org.apache.zeppelin.interpreter.InterpreterResult.Code;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import scala.Console;
+import scala.None;
+import scala.Some;
+import scala.tools.nsc.Settings;
+import scala.tools.nsc.interpreter.IMain;
+import scala.tools.nsc.settings.MutableSettings.BooleanSetting;
+import scala.tools.nsc.settings.MutableSettings.PathSetting;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -28,32 +44,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.flink.api.scala.FlinkILoop;
-import org.apache.flink.configuration.Configuration;
-import org.apache.flink.runtime.StreamingMode;
-import org.apache.flink.runtime.minicluster.LocalFlinkMiniCluster;
-import org.apache.zeppelin.interpreter.Interpreter;
-import org.apache.zeppelin.interpreter.InterpreterContext;
-import org.apache.zeppelin.interpreter.InterpreterPropertyBuilder;
-import org.apache.zeppelin.interpreter.InterpreterResult;
-import org.apache.zeppelin.interpreter.InterpreterResult.Code;
-import org.apache.zeppelin.interpreter.InterpreterUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import scala.Console;
-import scala.None;
-import scala.Some;
-import scala.tools.nsc.Settings;
-import scala.tools.nsc.interpreter.IMain;
-import scala.tools.nsc.settings.MutableSettings.BooleanSetting;
-import scala.tools.nsc.settings.MutableSettings.PathSetting;
-
 /**
  * Interpreter for Apache Flink (http://flink.apache.org)
  */
-public class FlinkInterpreter extends Interpreter {
-  Logger logger = LoggerFactory.getLogger(FlinkInterpreter.class);
+public class FlinkInterpreterStreaming extends Interpreter {
+  Logger logger = LoggerFactory.getLogger(FlinkInterpreterStreaming.class);
   private ByteArrayOutputStream out;
   private Configuration flinkConf;
   private LocalFlinkMiniCluster localFlinkCluster;
@@ -61,15 +56,15 @@ public class FlinkInterpreter extends Interpreter {
   private Map<String, Object> binder;
   private IMain imain;
 
-  public FlinkInterpreter(Properties property) {
+  public FlinkInterpreterStreaming(Properties property) {
     super(property);
   }
 
   static {
     Interpreter.register(
         "flink",
-        "batch",
-        FlinkInterpreter.class.getName(),
+        "streaming",
+        FlinkInterpreterStreaming.class.getName(),
         new InterpreterPropertyBuilder()
                 .add("host", "local",
                         "host name of running JobManager. 'local' runs flink in local mode")
@@ -81,7 +76,7 @@ public class FlinkInterpreter extends Interpreter {
   @Override
   public void open() {
     out = new ByteArrayOutputStream();
-    flinkConf = new org.apache.flink.configuration.Configuration();
+    flinkConf = new Configuration();
     Properties intpProperty = getProperty();
     for (Object k : intpProperty.keySet()) {
       String key = (String) k;
@@ -96,7 +91,7 @@ public class FlinkInterpreter extends Interpreter {
     flinkIloop = new FlinkILoop(
             getHost(),
             getPort(),
-            StreamingMode.BATCH_ONLY,
+            StreamingMode.STREAMING,
             (BufferedReader) null,
             new PrintWriter(out));
     flinkIloop.settings_$eq(createSettings());
@@ -268,7 +263,7 @@ public class FlinkInterpreter extends Interpreter {
         incomplete = "";
       }
     }
-
+    flinkIloop.reset();
     if (r == Code.INCOMPLETE) {
       return new InterpreterResult(r, "Incomplete expression");
     } else {
@@ -308,7 +303,7 @@ public class FlinkInterpreter extends Interpreter {
   }
 
   private void startFlinkMiniCluster() {
-    localFlinkCluster = new LocalFlinkMiniCluster(flinkConf, false, StreamingMode.BATCH_ONLY);
+    localFlinkCluster = new LocalFlinkMiniCluster(flinkConf, false, StreamingMode.STREAMING);
     localFlinkCluster.waitForTaskManagersToBeRegistered();
   }
 
