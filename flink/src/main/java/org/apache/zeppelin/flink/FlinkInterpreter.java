@@ -60,8 +60,8 @@ import scala.tools.nsc.settings.MutableSettings.PathSetting;
 public class FlinkInterpreter extends Interpreter {
   Logger logger = LoggerFactory.getLogger(FlinkInterpreter.class);
   private ByteArrayOutputStream out;
-  private Configuration flinkConf;
-  private LocalFlinkMiniCluster localFlinkCluster;
+  public Configuration flinkConf;
+  public LocalFlinkMiniCluster localFlinkCluster;
   private FlinkILoop flinkIloop;
   private Map<String, Object> binder;
   private IMain imain;
@@ -72,13 +72,13 @@ public class FlinkInterpreter extends Interpreter {
 
   static {
     Interpreter.register(
-        "batch",
-        "flink",
+        "flinkBatch",
+        "flinkBatch",
         FlinkInterpreter.class.getName(),
         new InterpreterPropertyBuilder()
                 .add("host", "local",
-                        "host name of running JobManager. 'local' runs flink in local mode")
-          .add("port", "6123", "port of running JobManager")
+                     "host name of running JobManager. 'local' runs flink in local mode")
+          .add("jobmanager.rpc.port", "6123", "port of running JobManager")
           .build()
     );
   }
@@ -124,6 +124,7 @@ public class FlinkInterpreter extends Interpreter {
     imain.interpret("import org.apache.flink.api.scala._");
     imain.interpret("import org.apache.flink.api.common.functions._");
     imain.bindValue("env", env);
+    imain.bindValue("thisenv", this);
   }
 
   private boolean localMode() {

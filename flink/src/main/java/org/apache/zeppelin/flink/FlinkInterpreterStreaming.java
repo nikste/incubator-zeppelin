@@ -17,22 +17,6 @@
  */
 package org.apache.zeppelin.flink;
 
-import org.apache.flink.api.scala.FlinkILoop;
-import org.apache.flink.configuration.Configuration;
-import org.apache.flink.runtime.StreamingMode;
-import org.apache.flink.runtime.minicluster.LocalFlinkMiniCluster;
-import org.apache.zeppelin.interpreter.*;
-import org.apache.zeppelin.interpreter.InterpreterResult.Code;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import scala.Console;
-import scala.None;
-import scala.Some;
-import scala.tools.nsc.Settings;
-import scala.tools.nsc.interpreter.IMain;
-import scala.tools.nsc.settings.MutableSettings.BooleanSetting;
-import scala.tools.nsc.settings.MutableSettings.PathSetting;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -44,14 +28,35 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.flink.api.scala.FlinkILoop;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.runtime.StreamingMode;
+import org.apache.flink.runtime.minicluster.LocalFlinkMiniCluster;
+import org.apache.zeppelin.interpreter.Interpreter;
+import org.apache.zeppelin.interpreter.InterpreterContext;
+import org.apache.zeppelin.interpreter.InterpreterPropertyBuilder;
+import org.apache.zeppelin.interpreter.InterpreterResult;
+import org.apache.zeppelin.interpreter.InterpreterResult.Code;
+import org.apache.zeppelin.interpreter.InterpreterUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import scala.Console;
+import scala.None;
+import scala.Some;
+import scala.tools.nsc.Settings;
+import scala.tools.nsc.interpreter.IMain;
+import scala.tools.nsc.settings.MutableSettings.BooleanSetting;
+import scala.tools.nsc.settings.MutableSettings.PathSetting;
+
 /**
  * Interpreter for Apache Flink (http://flink.apache.org)
  */
 public class FlinkInterpreterStreaming extends Interpreter {
   Logger logger = LoggerFactory.getLogger(FlinkInterpreterStreaming.class);
   private ByteArrayOutputStream out;
-  private Configuration flinkConf;
-  private LocalFlinkMiniCluster localFlinkCluster;
+  public Configuration flinkConf;
+  public LocalFlinkMiniCluster localFlinkCluster;
   private FlinkILoop flinkIloop;
   private Map<String, Object> binder;
   private IMain imain;
@@ -62,21 +67,21 @@ public class FlinkInterpreterStreaming extends Interpreter {
 
   static {
     Interpreter.register(
-        "streaming",
-        "flink",
-        FlinkInterpreterStreaming.class.getName(),
-        new InterpreterPropertyBuilder()
-                .add("host", "local",
-                        "host name of running JobManager. 'local' runs flink in local mode")
-          .add("port", "6123", "port of running JobManager")
-          .build()
+            "flinkStreaming",
+            "flinkStreaming",
+            FlinkInterpreterStreaming.class.getName(),
+            new InterpreterPropertyBuilder()
+                    .add("host", "local",
+                            "host name of running JobManager. 'local' runs flink in local mode")
+                    .add("jobmanager.rpc.port", "6124", "port of running JobManager")
+                    .build()
     );
   }
 
   @Override
   public void open() {
     out = new ByteArrayOutputStream();
-    flinkConf = new Configuration();
+    flinkConf = new org.apache.flink.configuration.Configuration();
     Properties intpProperty = getProperty();
     for (Object k : intpProperty.keySet()) {
       String key = (String) k;
@@ -96,21 +101,22 @@ public class FlinkInterpreterStreaming extends Interpreter {
             new PrintWriter(out));
     flinkIloop.settings_$eq(createSettings());
     flinkIloop.createInterpreter();
-    
+
     imain = flinkIloop.intp();
 
     // prepare bindings
     imain.interpret("@transient var _binder = new java.util.HashMap[String, Object]()");
-    binder = (Map<String, Object>) getValue("_binder");    
+    binder = (Map<String, Object>) getValue("_binder");
 
     // import libraries
     imain.interpret("import scala.tools.nsc.io._");
     imain.interpret("import Properties.userHome");
     imain.interpret("import scala.compat.Platform.EOL");
-    
+
     imain.interpret("import org.apache.flink.api.scala._");
     imain.interpret("import org.apache.flink.api.common.functions._");
     imain.bindValue("env", flinkIloop.scalaEnv());
+    imain.bindValue("thisenv", this);
   }
 
   private boolean localMode() {
@@ -165,10 +171,10 @@ public class FlinkInterpreterStreaming extends Interpreter {
     BooleanSetting b = (BooleanSetting) settings.usejavacp();
     b.v_$eq(true);
     settings.scala$tools$nsc$settings$StandardScalaSettings$_setter_$usejavacp_$eq(b);
-    
+
     return settings;
   }
-  
+
 
   private List<File> currentClassPath() {
     List<File> paths = classPath(Thread.currentThread().getContextClassLoader());
@@ -232,7 +238,7 @@ public class FlinkInterpreterStreaming extends Interpreter {
 
   public InterpreterResult interpret(String[] lines, InterpreterContext context) {
     IMain imain = flinkIloop.intp();
-    
+
     String[] linesToRun = new String[lines.length + 1];
     for (int i = 0; i < lines.length; i++) {
       linesToRun[i] = lines[i];
@@ -244,7 +250,17 @@ public class FlinkInterpreterStreaming extends Interpreter {
     Code r = null;
 
     String incomplete = "";
-    for (String s : linesToRun) {
+    for (int l = 0; l < linesToRun.length; l++) {
+      String s = linesToRun[l];
+      // check if next line starts with "." (but not ".." or "./") it is treated as an invocation
+      if (l + 1 < linesToRun.length) {
+        String nextLine = linesToRun[l + 1].trim();
+        if (nextLine.startsWith(".") && !nextLine.startsWith("..") && !nextLine.startsWith("./")) {
+          incomplete += s + "\n";
+          continue;
+        }
+      }
+
       scala.tools.nsc.interpreter.Results.Result res = null;
       try {
         res = imain.interpret(incomplete + s);
@@ -263,7 +279,7 @@ public class FlinkInterpreterStreaming extends Interpreter {
         incomplete = "";
       }
     }
-    flinkIloop.reset();
+
     if (r == Code.INCOMPLETE) {
       return new InterpreterResult(r, "Incomplete expression");
     } else {
@@ -309,7 +325,7 @@ public class FlinkInterpreterStreaming extends Interpreter {
 
   private void stopFlinkMiniCluster() {
     if (localFlinkCluster != null) {
-      localFlinkCluster.stop();
+      localFlinkCluster.shutdown();
       localFlinkCluster = null;
     }
   }
