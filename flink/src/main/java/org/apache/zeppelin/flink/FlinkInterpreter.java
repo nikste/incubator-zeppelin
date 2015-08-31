@@ -72,8 +72,8 @@ public class FlinkInterpreter extends Interpreter {
 
   static {
     Interpreter.register(
-        "flink",
         "batch",
+        "flink",
         FlinkInterpreter.class.getName(),
         new InterpreterPropertyBuilder()
                 .add("host", "local",

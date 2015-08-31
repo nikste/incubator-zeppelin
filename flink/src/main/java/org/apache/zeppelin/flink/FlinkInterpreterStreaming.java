@@ -62,8 +62,8 @@ public class FlinkInterpreterStreaming extends Interpreter {
 
   static {
     Interpreter.register(
-        "flink",
         "streaming",
+        "flink",
         FlinkInterpreterStreaming.class.getName(),
         new InterpreterPropertyBuilder()
                 .add("host", "local",
