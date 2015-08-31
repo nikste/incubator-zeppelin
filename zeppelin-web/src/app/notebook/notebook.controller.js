@@ -35,10 +35,18 @@ angular.module('zeppelinWebApp').controller('NotebookCtrl', function($scope, $ro
 
   $scope.interpreterSettings = [];
   $scope.interpreterBindings = [];
-  $scope.isNoteDirty = null;  
+  $scope.isNoteDirty = null;
   $scope.saveTimer = null;
 
   var angularObjectRegistry = {};
+  var connectedOnce = false;
+
+  $scope.$on('setConnectedStatus', function(event, param) {
+    if(connectedOnce && param){
+      initNotebook();
+    }
+    connectedOnce = true;
+  });
 
   $scope.getCronOptionNameFromValue = function(value) {
     if (!value) {
@@ -70,6 +78,15 @@ angular.module('zeppelinWebApp').controller('NotebookCtrl', function($scope, $ro
     }
   };
 
+  //Clone note
+  $scope.cloneNote = function(noteId) {
+    var result = confirm('Do you want to clone this notebook?');
+    if (result) {
+      websocketMsgSrv.cloneNotebook(noteId);
+      $location.path('/#');
+    }
+  };
+  
   $scope.runNote = function() {
     var result = confirm('Run all paragraphs?');
     if (result) {
@@ -149,7 +166,7 @@ angular.module('zeppelinWebApp').controller('NotebookCtrl', function($scope, $ro
   };
 
   $scope.setLookAndFeel = function(looknfeel) {
-    $scope.note.config.looknfeel = looknfeel;    
+    $scope.note.config.looknfeel = looknfeel;
     $scope.setConfig();
   };
 
