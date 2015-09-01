@@ -142,7 +142,7 @@ public class FlinkInterpreter extends Interpreter {
 
   private int getPort() {
     if (localMode()) {
-      return localFlinkCluster.getJobManagerRPCPort();
+      return localFlinkCluster.getLeaderRPCPort();
     } else {
       return Integer.parseInt(getProperty("port"));
     }
@@ -337,7 +337,11 @@ public class FlinkInterpreter extends Interpreter {
 
   private void startFlinkMiniCluster() {
     localFlinkCluster = new LocalFlinkMiniCluster(flinkConf, false, StreamingMode.BATCH_ONLY);
-    localFlinkCluster.waitForTaskManagersToBeRegistered();
+    try {
+      localFlinkCluster.waitForTaskManagersToBeRegistered();
+    } catch (Exception e){
+      logger.error("Could not register localFlinkCluster: ", e);
+    }
   }
 
   private void stopFlinkMiniCluster() {
