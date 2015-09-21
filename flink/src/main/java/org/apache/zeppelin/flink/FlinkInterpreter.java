@@ -123,6 +123,7 @@ public class FlinkInterpreter extends Interpreter {
 
     org.apache.flink.api.scala.ExecutionEnvironment env =
             flinkIloop.getBatchExecutionEnvironment();
+
     env.getConfig().disableSysoutLogging();
 
     // prepare bindings
@@ -286,8 +287,8 @@ public class FlinkInterpreter extends Interpreter {
       scala.tools.nsc.interpreter.Results.Result res = null;
       try {
         res = Console.withOut(
-          System.out,
-          new AbstractFunction0<Results.Result>() {
+            System.out,
+            new AbstractFunction0<Results.Result>() {
             @Override
             public Results.Result apply() {
               return imain.interpret(currentCommand + s);

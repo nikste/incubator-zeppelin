@@ -32,6 +32,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.flink.api.java.ExecutionEnvironment;
+import org.apache.flink.api.java.ScalaShellRemoteEnvironment;
+import org.apache.flink.api.java.ScalaShellRemoteStreamEnvironment;
 import org.apache.flink.api.scala.FlinkILoop;
 import org.apache.flink.configuration.Configuration;
 import java.util.concurrent.TimeoutException;
@@ -121,11 +123,7 @@ public class FlinkInterpreterStreaming extends Interpreter {
 
     imain = flinkIloop.intp();
 
-    org.apache.flink.
-            streaming.
-            api.
-            scala.
-            StreamExecutionEnvironment env =
+    org.apache.flink.streaming.api.scala.StreamExecutionEnvironment env =
             flinkIloop.getStreamExecutionEnvironment();
 
     env.getConfig().disableSysoutLogging();
@@ -291,8 +289,8 @@ public class FlinkInterpreterStreaming extends Interpreter {
       scala.tools.nsc.interpreter.Results.Result res = null;
       try {
         res = Console.withOut(
-          System.out,
-          new AbstractFunction0<Results.Result>() {
+            System.out,
+            new AbstractFunction0<Results.Result>() {
             @Override
             public Results.Result apply() {
               return imain.interpret(currentCommand + s);
