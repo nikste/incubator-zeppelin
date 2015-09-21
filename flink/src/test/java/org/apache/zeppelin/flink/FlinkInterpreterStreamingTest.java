@@ -84,9 +84,9 @@ public class FlinkInterpreterStreamingTest {
     System.out.println(flink.interpret("counts.print", context).message());
     System.out.println(flink.interpret("import org.apache.flink.contrib.streaming.scala.DataStreamUtils._", context).message());
     System.out.println(flink.interpret("var collected = collect[(String,Int)](counts)", context).message());
-    InterpreterResult result = flink.interpret("while(collected.hasNext()){var el = collected.next();println(\"next element:\" + el) }",context);
+    //InterpreterResult result = flink.interpret("while(collected.hasNext()){var el = collected.next();println(\"next element:\" + el) }",context);
+    InterpreterResult result = flink.interpret("env.execute(\"Scala Socket Stream WordCount\")", context);
     System.out.println("res:" + result.message());
-    //InterpreterResult result = flink.interpret("env.execute(\"Scala Socket Stream WordCount\")", context);
     assertEquals(Code.SUCCESS, result.code());
   }
 }
