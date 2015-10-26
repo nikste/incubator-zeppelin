@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.zeppelin.flink;
 
 import java.io.BufferedReader;
@@ -31,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.flink.api.java.ExecutionEnvironment;
+import org.apache.flink.api.scala.ExecutionEnvironment;
 import org.apache.flink.api.scala.FlinkILoop;
 import org.apache.flink.configuration.Configuration;
 import java.util.concurrent.TimeoutException;
@@ -121,8 +122,7 @@ public class FlinkInterpreter extends Interpreter {
 
     imain = flinkIloop.intp();
 
-    org.apache.flink.api.scala.ExecutionEnvironment env =
-            flinkIloop.getBatchExecutionEnvironment();
+    ExecutionEnvironment env = (ExecutionEnvironment) flinkIloop.scalaEnv();
 
     env.getConfig().disableSysoutLogging();
 
@@ -363,3 +363,4 @@ public class FlinkInterpreter extends Interpreter {
     return (o instanceof String) ? (String) o : "";
   }
 }
+

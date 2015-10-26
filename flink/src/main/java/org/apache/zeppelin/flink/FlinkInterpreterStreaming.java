@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.LinkedList;
@@ -31,15 +32,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.ScalaShellRemoteEnvironment;
 import org.apache.flink.api.java.ScalaShellRemoteStreamEnvironment;
 import org.apache.flink.api.scala.FlinkILoop;
+import org.apache.flink.client.CliFrontend;
+import org.apache.flink.client.cli.CommandLineOptions;
 import org.apache.flink.configuration.Configuration;
+
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.apache.flink.configuration.GlobalConfiguration;
 import org.apache.flink.runtime.StreamingMode;
+import org.apache.flink.runtime.akka.AkkaUtils;
+import org.apache.flink.runtime.client.JobStatusMessage;
+import org.apache.flink.runtime.instance.ActorGateway;
+import org.apache.flink.runtime.jobgraph.JobGraph;
+import org.apache.flink.runtime.jobgraph.JobVertex;
+import org.apache.flink.runtime.jobmanager.JobManager;
+import org.apache.flink.runtime.leaderretrieval.LeaderRetrievalService;
+import org.apache.flink.runtime.messages.JobManagerMessages;
 import org.apache.flink.runtime.minicluster.LocalFlinkMiniCluster;
+import org.apache.flink.runtime.util.LeaderRetrievalUtils;
+import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment;
 import org.apache.zeppelin.interpreter.Interpreter;
 import org.apache.zeppelin.interpreter.InterpreterContext;
 import org.apache.zeppelin.interpreter.InterpreterPropertyBuilder;
@@ -53,6 +71,9 @@ import scala.Console;
 import scala.None;
 import scala.Option;
 import scala.Some;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.FiniteDuration;
 import scala.runtime.AbstractFunction0;
 import scala.tools.nsc.Settings;
 import scala.tools.nsc.interpreter.IMain;
@@ -71,6 +92,7 @@ public class FlinkInterpreterStreaming extends Interpreter {
   private FlinkILoop flinkIloop;
   private Map<String, Object> binder;
   private IMain imain;
+  private ActorSystem actorSystem;
 
   public FlinkInterpreterStreaming(Properties property) {
     super(property);
@@ -92,7 +114,7 @@ public class FlinkInterpreterStreaming extends Interpreter {
   @Override
   public void open() {
     out = new ByteArrayOutputStream();
-    flinkConf = new org.apache.flink.configuration.Configuration();
+    flinkConf = new Configuration();
     Properties intpProperty = getProperty();
     for (Object k : intpProperty.keySet()) {
       String key = (String) k;
@@ -123,8 +145,7 @@ public class FlinkInterpreterStreaming extends Interpreter {
 
     imain = flinkIloop.intp();
 
-    org.apache.flink.streaming.api.scala.StreamExecutionEnvironment env =
-            flinkIloop.getStreamExecutionEnvironment();
+    StreamExecutionEnvironment env = (StreamExecutionEnvironment) flinkIloop.scalaEnv();
 
     env.getConfig().disableSysoutLogging();
 
@@ -329,8 +350,68 @@ public class FlinkInterpreterStreaming extends Interpreter {
     }
   }
 
+
+  /*
+  ActorGateway getJobManager() throws Exception {
+    //TODO(nikste): Get ActorRef from YarnCluster if we are in YARN mode.
+
+    InetSocketAddress address = new InetSocketAddress(flinkIloop.host(), flinkIloop.port());
+
+
+    val port = configuration.getInteger(ConfigConstants.JOB_MANAGER_IPC_PORT_KEY,
+            ConfigConstants.DEFAULT_JOB_MANAGER_IPC_PORT);
+    // start an actor system if needed
+    if (this.actorSystem == null) {
+      try {
+        scala.Tuple2<String, Object> systemEndpoint = new scala.Tuple2<String, Object>("", 0);
+        //GlobalConfiguration.getConfiguration();
+        this.actorSystem = AkkaUtils.createActorSystem(
+                 flinkConf,
+                new Some<scala.Tuple2<String, Object>>(systemEndpoint));
+      }
+      catch (Exception e) {
+        throw new IOException("Could not start actor system to communicate with JobManager", e);
+      }
+    }
+
+    LeaderRetrievalService lrs1 =
+            LeaderRetrievalUtils.createLeaderRetrievalService(flinkConf);
+                    //GlobalConfiguration.getConfiguration());
+
+    FiniteDuration lookupTimeout = new FiniteDuration(1000, TimeUnit.MILLISECONDS);
+    return LeaderRetrievalUtils.retrieveLeaderGateway(lrs1, this.actorSystem, lookupTimeout);
+  }
+*/
+
   @Override
   public void cancel(InterpreterContext context) {
+/*
+    System.out.println("CANCELLING JOB!!!");
+    StreamExecutionEnvironment env =
+            (StreamExecutionEnvironment) flinkIloop.scalaEnv();
+
+
+    try {
+      ActorGateway jobManager = getJobManager();
+      Future<Object> ask = jobManager.ask(
+              JobManagerMessages.getRequestRunningJobsStatus(),
+              new FiniteDuration(1000, TimeUnit.MILLISECONDS));
+
+      Object result = Await.result(
+              ask,
+              new FiniteDuration(2000,
+                      TimeUnit.MILLISECONDS));
+      List<JobStatusMessage> jobs =
+              ((JobManagerMessages.RunningJobsStatus) result)
+                      .getStatusMessages();
+      for (JobStatusMessage job : jobs) {
+        Future response = jobManager.ask(
+                new JobManagerMessages.CancelJob(job.getJobId()),
+                new FiniteDuration(1000, TimeUnit.MILLISECONDS));
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }*/
   }
 
   @Override
