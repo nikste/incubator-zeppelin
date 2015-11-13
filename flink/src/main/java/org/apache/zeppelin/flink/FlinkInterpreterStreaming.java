@@ -32,6 +32,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.flink.api.java.ExecutionEnvironment;
+import org.apache.flink.api.java.ScalaShellRemoteEnvironment;
+import org.apache.flink.api.java.ScalaShellRemoteStreamEnvironment;
 import org.apache.flink.api.scala.FlinkILoop;
 import org.apache.flink.configuration.Configuration;
 import java.util.concurrent.TimeoutException;
@@ -61,8 +63,8 @@ import scala.tools.nsc.settings.MutableSettings.PathSetting;
 /**
  * Interpreter for Apache Flink (http://flink.apache.org)
  */
-public class FlinkInterpreter extends Interpreter {
-  Logger logger = LoggerFactory.getLogger(FlinkInterpreter.class);
+public class FlinkInterpreterStreaming extends Interpreter {
+  Logger logger = LoggerFactory.getLogger(FlinkInterpreterStreaming.class);
   private ByteArrayOutputStream out;
   private Configuration flinkConf;
   private LocalFlinkMiniCluster localFlinkCluster;
@@ -70,19 +72,19 @@ public class FlinkInterpreter extends Interpreter {
   private Map<String, Object> binder;
   private IMain imain;
 
-  public FlinkInterpreter(Properties property) {
+  public FlinkInterpreterStreaming(Properties property) {
     super(property);
   }
 
   static {
     Interpreter.register(
-            "flinkBatch",
-            "flinkBatch",
-            FlinkInterpreter.class.getName(),
+            "flinkStreaming",
+            "flinkStreaming",
+            FlinkInterpreterStreaming.class.getName(),
             new InterpreterPropertyBuilder()
                     .add("host", "local",
                             "host name of running JobManager. 'local' runs flink in local mode")
-                    .add("jobmanager.rpc.port", "6123", "port of running JobManager")
+                    .add("jobmanager.rpc.port", "6124", "port of running JobManager")
                     .build()
     );
   }
@@ -112,7 +114,7 @@ public class FlinkInterpreter extends Interpreter {
     String host = getHost();
     flinkIloop = new FlinkILoop(getHost(),
             getPort(),
-            StreamingMode.BATCH_ONLY,
+            StreamingMode.STREAMING,
             (BufferedReader) null,
             new PrintWriter(out));
 
@@ -121,8 +123,8 @@ public class FlinkInterpreter extends Interpreter {
 
     imain = flinkIloop.intp();
 
-    org.apache.flink.api.scala.ExecutionEnvironment env =
-            flinkIloop.getBatchExecutionEnvironment();
+    org.apache.flink.streaming.api.scala.StreamExecutionEnvironment env =
+            flinkIloop.getStreamExecutionEnvironment();
 
     env.getConfig().disableSysoutLogging();
 
@@ -347,7 +349,7 @@ public class FlinkInterpreter extends Interpreter {
   }
 
   private void startFlinkMiniCluster() throws InterruptedException, TimeoutException {
-    localFlinkCluster = new LocalFlinkMiniCluster(flinkConf, false, StreamingMode.BATCH_ONLY);
+    localFlinkCluster = new LocalFlinkMiniCluster(flinkConf, false, StreamingMode.STREAMING);
     localFlinkCluster.start();
     localFlinkCluster.waitForTaskManagersToBeRegistered();
   }

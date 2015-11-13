@@ -35,7 +35,7 @@
   <url>http://zeppelin.incubator.apache.org</url>
 
   <properties>
-    <flink.version>0.9.0</flink.version>
+    <flink.version>0.10-SNAPSHOT-ZEPPELIN</flink.version>
     <flink.akka.version>2.3.7</flink.akka.version>
     <flink.scala.binary.version>2.10</flink.scala.binary.version>
     <flink.scala.version>2.10.4</flink.scala.version>
@@ -91,7 +91,25 @@
 
     <dependency>
       <groupId>org.apache.flink</groupId>
+      <artifactId>flink-streaming-scala</artifactId>
+      <version>${flink.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-streaming-contrib</artifactId>
+      <version>${flink.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.flink</groupId>
       <artifactId>flink-scala-shell</artifactId>
+      <version>${flink.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-connector-twitter</artifactId>
       <version>${flink.version}</version>
     </dependency>
 

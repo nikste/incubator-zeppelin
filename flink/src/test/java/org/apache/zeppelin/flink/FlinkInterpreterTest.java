@@ -74,6 +74,7 @@ public class FlinkInterpreterTest {
     flink.interpret("val text = env.fromElements(\"To be or not to be\")", context);
     flink.interpret("val counts = text.flatMap { _.toLowerCase.split(\" \") }.map { (_, 1) }.groupBy(0).sum(1)", context);
     InterpreterResult result = flink.interpret("counts.print()", context);
+    System.out.println(result.code());
     assertEquals(Code.SUCCESS, result.code());
 
     String[] expectedCounts = {"(to,2)", "(be,2)", "(or,1)", "(not,1)"};
