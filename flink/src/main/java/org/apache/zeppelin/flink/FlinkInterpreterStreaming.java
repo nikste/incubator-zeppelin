@@ -17,41 +17,17 @@
  */
 package org.apache.zeppelin.flink;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
-import org.apache.flink.api.java.ExecutionEnvironment;
-import org.apache.flink.api.java.ScalaShellRemoteEnvironment;
-import org.apache.flink.api.java.ScalaShellRemoteStreamEnvironment;
 import org.apache.flink.api.scala.FlinkILoop;
 import org.apache.flink.configuration.Configuration;
-import java.util.concurrent.TimeoutException;
-
 import org.apache.flink.runtime.StreamingMode;
 import org.apache.flink.runtime.minicluster.LocalFlinkMiniCluster;
-import org.apache.zeppelin.interpreter.Interpreter;
-import org.apache.zeppelin.interpreter.InterpreterContext;
-import org.apache.zeppelin.interpreter.InterpreterPropertyBuilder;
-import org.apache.zeppelin.interpreter.InterpreterResult;
+import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment;
+import org.apache.zeppelin.interpreter.*;
 import org.apache.zeppelin.interpreter.InterpreterResult.Code;
-import org.apache.zeppelin.interpreter.InterpreterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import scala.Console;
 import scala.None;
-import scala.Option;
 import scala.Some;
 import scala.runtime.AbstractFunction0;
 import scala.tools.nsc.Settings;
@@ -59,6 +35,15 @@ import scala.tools.nsc.interpreter.IMain;
 import scala.tools.nsc.interpreter.Results;
 import scala.tools.nsc.settings.MutableSettings.BooleanSetting;
 import scala.tools.nsc.settings.MutableSettings.PathSetting;
+
+import java.io.*;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Interpreter for Apache Flink (http://flink.apache.org)
@@ -124,7 +109,7 @@ public class FlinkInterpreterStreaming extends Interpreter {
     imain = flinkIloop.intp();
 
     org.apache.flink.streaming.api.scala.StreamExecutionEnvironment env =
-            flinkIloop.getStreamExecutionEnvironment();
+            (StreamExecutionEnvironment) flinkIloop.scalaEnv();
 
     env.getConfig().disableSysoutLogging();
 

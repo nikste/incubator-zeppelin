@@ -122,7 +122,7 @@ public class FlinkInterpreter extends Interpreter {
     imain = flinkIloop.intp();
 
     org.apache.flink.api.scala.ExecutionEnvironment env =
-            flinkIloop.getBatchExecutionEnvironment();
+            (org.apache.flink.api.scala.ExecutionEnvironment) flinkIloop.scalaEnv();
 
     env.getConfig().disableSysoutLogging();
 
