@@ -40,6 +40,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.flink.runtime.StreamingMode;
 import org.apache.flink.runtime.minicluster.LocalFlinkMiniCluster;
+import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment;
 import org.apache.zeppelin.interpreter.Interpreter;
 import org.apache.zeppelin.interpreter.InterpreterContext;
 import org.apache.zeppelin.interpreter.InterpreterPropertyBuilder;
@@ -124,7 +125,7 @@ public class FlinkInterpreterStreaming extends Interpreter {
     imain = flinkIloop.intp();
 
     org.apache.flink.streaming.api.scala.StreamExecutionEnvironment env =
-            flinkIloop.getStreamExecutionEnvironment();
+            (StreamExecutionEnvironment) flinkIloop.scalaEnv();
 
     env.getConfig().disableSysoutLogging();
 
@@ -267,9 +268,9 @@ public class FlinkInterpreterStreaming extends Interpreter {
       linesToRun[i] = lines[i];
     }
     linesToRun[lines.length] = "print(\"\")";
-
-    System.setOut(new PrintStream(out));
-    out.reset();
+    PrintStream outOld = System.out;
+    System.setOut(new PrintStream(this.out));
+    this.out.reset();
     Code r = null;
 
     String incomplete = "";
@@ -303,8 +304,9 @@ public class FlinkInterpreterStreaming extends Interpreter {
 
       r = getResultCode(res);
 
+      System.setOut(outOld);
       if (r == Code.ERROR) {
-        return new InterpreterResult(r, out.toString());
+        return new InterpreterResult(r, this.out.toString());
       } else if (r == Code.INCOMPLETE) {
         incomplete += s + "\n";
       } else {
@@ -315,7 +317,7 @@ public class FlinkInterpreterStreaming extends Interpreter {
     if (r == Code.INCOMPLETE) {
       return new InterpreterResult(r, "Incomplete expression");
     } else {
-      return new InterpreterResult(r, out.toString());
+      return new InterpreterResult(r, this.out.toString());
     }
   }
 

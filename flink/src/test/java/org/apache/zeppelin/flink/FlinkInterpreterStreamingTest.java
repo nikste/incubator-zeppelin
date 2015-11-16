@@ -89,4 +89,19 @@ public class FlinkInterpreterStreamingTest {
     //InterpreterResult result = flink.interpret("env.execute(\"Scala Socket Stream WordCount\")", context);
     assertEquals(Code.SUCCESS, result.code());
   }
+
+
+  @Test
+  public void dummy() {
+    System.out.println(flink.interpret("import org.apache.flink.streaming.api.scala.DataStream", context).message());
+    System.out.println(flink.interpret("import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment", context).message());
+    System.out.println(flink.interpret("import org.apache.flink.streaming.connectors.rabbitmq.RMQSource", context).message());
+    System.out.println(flink.interpret("import org.apache.flink.streaming.util.serialization.SimpleStringSchema", context).message());
+    System.out.println(flink.interpret("val data: DataStream[String] = env.addSource(new RMQSource[String](\"localhost\",  \"DATA\", new SimpleStringSchema))", context).message());
+    InterpreterResult result = flink.interpret("data.print()", context);
+    System.out.println("res:" + result.message());
+
+    assertEquals(Code.SUCCESS, result.code());
+
+  }
 }
