@@ -388,7 +388,13 @@ public class Notebook {
 
       String noteId = context.getJobDetail().getJobDataMap().getString("noteId");
       Note note = notebook.getNote(noteId);
-      note.runAll();
+      //note.runAll();
+      //TODO(nikste): dirty hack for not running all the code everytime.
+      List<Paragraph> paragraphs = note.paragraphs;
+      Paragraph paragraph = paragraphs.get(2);
+      String id = paragraph.getId();
+      note.run(id);
+
     }
   }
 
