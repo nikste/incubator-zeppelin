@@ -649,7 +649,7 @@ angular.module('zeppelinWebApp')
     var lineHeight = $scope.editor.renderer.lineHeight;
     var headerHeight = 103; // menubar, notebook titlebar
     var scrollTriggerEdgeMargin = 50;
-    
+
     var documentHeight = angular.element(document).height();
     var windowHeight = angular.element(window).height();  // actual viewport height
 
@@ -838,6 +838,9 @@ angular.module('zeppelinWebApp')
       var height = $scope.paragraph.config.graph.height;
       $('#p'+$scope.paragraph.id+'_graph').height(height);
 
+      if (!type || type === 'mapChart') {
+        setMapChart(type, $scope.paragraph.result, refresh);
+      }
       if (!type || type === 'table') {
         setTable($scope.paragraph.result, refresh);
       }
@@ -943,6 +946,58 @@ angular.module('zeppelinWebApp')
     };
     $timeout(retryRenderer);
 
+  };
+
+var setMapChart = function(type, data, refresh) {
+    var latArr = [],
+      lngArr = [],
+      newmarkers = {};
+    if (!$scope.chart[type]) {
+
+      var mapChartModel = function(d) {
+        var key = d[1].replace('-', '_');
+        var obj = {};
+        latArr.push(Math.round(parseFloat(d[2])));
+        lngArr.push(Math.round(parseFloat(d[3])));
+        obj[key] = {
+          lat: parseFloat(d[2]),
+          lng: parseFloat(d[3]),
+          message: d[1],
+          focus: true,
+          draggable: false
+        };
+        return obj;
+      };
+
+      for (var i = 0; i < data.rows.length; i++) {
+        var row = data.rows[i];
+        var rowMarker = mapChartModel(row);
+        newmarkers = $.extend(newmarkers, rowMarker);
+      }
+    }
+    /*
+    //data model validator
+    var msg = dataValidatorSrv.validateMapData(data);
+    //TODO- warning need to be show in here. currently it is only printing.
+    //need to know what is the standard way of warning in zepplin.
+    if(msg.error){
+      console.log(msg.msg);
+    }else{*/
+    //drawing map deatils if only data set is validated.
+    $scope.markers = newmarkers;
+    /*
+      var bounds = leafletBoundsHelpers.createBoundsFromArray([
+        [Math.max.apply(Math, latArr), Math.max.apply(Math, lngArr)],
+        [Math.min.apply(Math, latArr), Math.min.apply(Math, lngArr)]
+      ]);
+      $scope.bounds = bounds;*/
+
+
+      // set map chart height
+      var height = $scope.paragraph.config.graph.height;
+      $('#p'+$scope.paragraph.id+'_mapChart').height(height);
+
+    $scope.center = {};
   };
 
   var setD3Chart = function(type, data, refresh) {

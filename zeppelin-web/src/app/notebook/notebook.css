@@ -147,3 +147,12 @@
 .setting .modal-footer {
   border: 0px;
 }
+
+.angular-leaflet-map {
+  height: 300px;
+  width: 100%;
+}
+
+.graphContainer .mapChart {
+  overflow: hidden;
+}
