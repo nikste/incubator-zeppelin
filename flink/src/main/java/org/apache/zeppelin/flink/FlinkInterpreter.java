@@ -273,13 +273,14 @@ public class FlinkInterpreter extends Interpreter {
       Results.Result res = null;
       try {
         res = Console.withOut(
-                System.out,
-                new AbstractFunction0<Results.Result>() {
-                  @Override
-                  public Results.Result apply() {
-                    return imain.interpret(currentCommand + s);
-                  }
-                });
+          System.out,
+          new AbstractFunction0<Results.Result>() {
+            @Override
+            public Results.Result apply() {
+              return imain.interpret(currentCommand + s);
+            }
+          }
+        );
       } catch (Exception e) {
         logger.info("Interpreter exception", e);
         return new InterpreterResult(Code.ERROR, InterpreterUtils.getMostRelevantMessage(e));
