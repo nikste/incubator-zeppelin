@@ -963,7 +963,7 @@ var setMapChart = function(type, data, refresh) {
           lat: parseFloat(d[2]),
           lng: parseFloat(d[3]),
           message: d[1],
-          focus: true,
+          focus: false,
           draggable: false
         };
         return obj;

@@ -57,6 +57,8 @@ module.exports = function(config) {
       'bower_components/leaflet/dist/leaflet-src.js',
       'bower_components/angular-simple-logger/dist/angular-simple-logger.js',
       'bower_components/angular-leaflet-directive/dist/angular-leaflet-directive.js',
+      'bower_components/stomp-websocket/lib/stomp.min.js',
+      'bower_components/sockjs/sockjs.js',
       'bower_components/angular-mocks/angular-mocks.js',
       // endbower
       'src/app/app.js',

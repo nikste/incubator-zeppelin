@@ -22,6 +22,8 @@
   "jasmine": true,
   "predef": [ "inject" ],
   "globals": {
+    "Stomp": false,
+    "SockJS": false,
     "angular": false,
     "_": false,
     "jQuery": false,

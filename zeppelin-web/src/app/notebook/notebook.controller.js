@@ -18,6 +18,21 @@
 angular.module('zeppelinWebApp').controller('NotebookCtrl', function($scope, $route, $routeParams, $location,
                                                                      $rootScope, $http, websocketMsgSrv, baseUrlSrv,
                                                                      $timeout, SaveAsService) {
+
+  $rootScope.ws = new SockJS('http://127.0.0.1:15674/stomp');
+  $rootScope.stompClient = Stomp.over($rootScope.ws);
+
+  $rootScope.onConnect = function() {
+    console.log('connected');
+    $rootScope.stompClient.send('/queue/mikeQueue', {}, 'Hello, STOMP');
+  };
+
+  $rootScope.onError = function() {
+    console.log('connected error');
+  };
+
+  $rootScope.stompClient.connect('guest', 'guest', $rootScope.onConnect, $rootScope.onError, '/');
+
   $scope.note = null;
   $scope.showEditor = false;
   $scope.editorToggled = false;
