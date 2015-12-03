@@ -35,7 +35,7 @@
   <url>http://zeppelin.incubator.apache.org</url>
 
   <properties>
-    <flink.version>1.0-SNAPSHOT</flink.version>
+    <flink.version>1.0-SNAPSHOT-ZEPPELIN</flink.version>
     <flink.akka.version>2.3.7</flink.akka.version>
     <flink.scala.binary.version>2.10</flink.scala.binary.version>
     <flink.scala.version>2.10.4</flink.scala.version>
@@ -58,11 +58,6 @@
       <artifactId>zeppelin-interpreter</artifactId>
       <version>${project.version}</version>
       <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
     </dependency>
 
     <dependency>
@@ -150,16 +145,23 @@
     </dependency>
 
     <dependency>
-      <groupId>com.googlecode.json-simple</groupId>
-      <artifactId>json-simple</artifactId>
-      <version>1.1.1</version>
-    </dependency>
-
-    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-connector-rabbitmq</artifactId>
+      <version>${flink.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-connector-twitter</artifactId>
+      <version>${flink.version}</version>
+    </dependency>
+
   </dependencies>
   <build>
     <plugins>

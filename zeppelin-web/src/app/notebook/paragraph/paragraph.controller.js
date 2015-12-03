@@ -17,7 +17,7 @@
 
 angular.module('zeppelinWebApp')
   .controller('ParagraphCtrl', function($scope,$rootScope, $route, $window, $element, $routeParams, $location,
-                                         $timeout, $compile, websocketMsgSrv) {
+                                         $timeout, $compile, websocketMsgSrv, leafletData) {
 
   $scope.paragraph = null;
   $scope.editor = null;
@@ -949,6 +949,10 @@ angular.module('zeppelinWebApp')
   };
 
 var setMapChart = function(type, data, refresh) {
+  leafletData.getMap().then(function(map) {
+    //$log.info("Got access to map object. Invalidating size");
+    $scope.bs = map.getBounds();
+  });
     var latArr = [],
       lngArr = [],
       newmarkers = {};
@@ -985,8 +989,8 @@ var setMapChart = function(type, data, refresh) {
     }else{*/
     //drawing map deatils if only data set is validated.
     $scope.markers = newmarkers;
-    /*
-      var bounds = leafletBoundsHelpers.createBoundsFromArray([
+
+      /*var bounds = leafletBoundsHelpers.createBoundsFromArray([
         [Math.max.apply(Math, latArr), Math.max.apply(Math, lngArr)],
         [Math.min.apply(Math, latArr), Math.min.apply(Math, lngArr)]
       ]);
@@ -998,7 +1002,25 @@ var setMapChart = function(type, data, refresh) {
       $('#p'+$scope.paragraph.id+'_mapChart').height(height);
 
     $scope.center = {};
+
+  //TODO: this is bad and you should feel bad.
+  $rootScope.ws = new SockJS('http://127.0.0.1:15674/stomp');
+  $rootScope.stompClient = Stomp.over($rootScope.ws);
+
+  $rootScope.onError = function() {
+    console.log('connected error');
   };
+
+  $rootScope.stompClient.connect('guest', 'guest', $rootScope.onConnect, $rootScope.onError, '/');
+
+  $rootScope.onConnect = function() {
+    console.log('connected');
+    var b = $scope.bs
+    $rootScope.stompClient.send('/queue/mikeQueue', {},"{\"control\":{\"num_items\":" + Object.keys($scope.markers).length + ",\"bounds\":" +  JSON.stringify(b) + "}}");
+    console.log('sent!');
+  };
+  $rootScope.stompClient.connect('guest', 'guest', $rootScope.onConnect, $rootScope.onError, '/');
+};
 
   var setD3Chart = function(type, data, refresh) {
     if (!$scope.chart[type]) {
