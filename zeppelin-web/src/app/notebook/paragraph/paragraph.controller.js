@@ -951,7 +951,9 @@ angular.module('zeppelinWebApp')
 var setMapChart = function(type, data, refresh) {
   leafletData.getMap().then(function(map) {
     //$log.info("Got access to map object. Invalidating size");
-    $scope.bs = map.getBounds();
+
+      $scope.bs = map.getBounds();
+
   });
     var latArr = [],
       lngArr = [],
@@ -1011,12 +1013,14 @@ var setMapChart = function(type, data, refresh) {
     console.log('connected error');
   };
 
-  $rootScope.stompClient.connect('guest', 'guest', $rootScope.onConnect, $rootScope.onError, '/');
+  //$rootScope.stompClient.connect('guest', 'guest', $rootScope.onConnect, $rootScope.onError, '/');
 
   $rootScope.onConnect = function() {
     console.log('connected');
-    var b = $scope.bs
-    $rootScope.stompClient.send('/queue/mikeQueue', {},"{\"control\":{\"num_items\":" + Object.keys($scope.markers).length + ",\"bounds\":" +  JSON.stringify(b) + "}}");
+    var b = $scope.bs;
+    for(i = 0; i < 10; i++){
+      $rootScope.stompClient.send('/amq/queue/mikeQueue', {},'{\"control\":{\"num_items\":' + Object.keys($scope.markers).length + ',\"bounds\":' +  JSON.stringify(b) + '}}');
+    }
     console.log('sent!');
   };
   $rootScope.stompClient.connect('guest', 'guest', $rootScope.onConnect, $rootScope.onError, '/');

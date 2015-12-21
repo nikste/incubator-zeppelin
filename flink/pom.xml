@@ -42,7 +42,28 @@
     <scala.macros.version>2.0.1</scala.macros.version>
   </properties>
 
+  <repositories>
+    <repository>
+      <id>sonatype snapshots</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+    </repository>
+  </repositories>
+
+
   <dependencies>
+
+    <dependency>
+      <groupId>com.googlecode.json-simple</groupId>
+      <artifactId>json-simple</artifactId>
+      <version>1.1.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.github.sstone</groupId>
+      <artifactId>amqp-client_2.10</artifactId>
+      <version>1.5</version>
+    </dependency>
+
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>

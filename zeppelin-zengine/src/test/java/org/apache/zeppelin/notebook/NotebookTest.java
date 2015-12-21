@@ -17,24 +17,14 @@
 
 package org.apache.zeppelin.notebook;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.zeppelin.conf.ZeppelinConfiguration;
 import org.apache.zeppelin.conf.ZeppelinConfiguration.ConfVars;
 import org.apache.zeppelin.display.AngularObjectRegistry;
+import org.apache.zeppelin.flink.FlinkInterpreterStreaming;
 import org.apache.zeppelin.interpreter.InterpreterFactory;
 import org.apache.zeppelin.interpreter.InterpreterOption;
+import org.apache.zeppelin.interpreter.InterpreterResult;
 import org.apache.zeppelin.interpreter.mock.MockInterpreter1;
 import org.apache.zeppelin.interpreter.mock.MockInterpreter2;
 import org.apache.zeppelin.notebook.repo.NotebookRepo;
@@ -48,6 +38,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.quartz.SchedulerException;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.*;
+
 public class NotebookTest implements JobListenerFactory{
 
   private File tmpDir;
@@ -60,6 +58,27 @@ public class NotebookTest implements JobListenerFactory{
 
   @Before
   public void setUp() throws Exception {
+//    tmpDir = new File(System.getProperty("java.io.tmpdir")+"/ZeppelinLTest_"+System.currentTimeMillis());
+//    tmpDir.mkdirs();
+//    new File(tmpDir, "conf").mkdirs();
+//    notebookDir = new File(System.getProperty("java.io.tmpdir")+"/ZeppelinLTest_"+System.currentTimeMillis()+"/notebook");
+//    notebookDir.mkdirs();
+//
+//    System.setProperty(ConfVars.ZEPPELIN_HOME.getVarName(), tmpDir.getAbsolutePath());
+//    System.setProperty(ConfVars.ZEPPELIN_NOTEBOOK_DIR.getVarName(), notebookDir.getAbsolutePath());
+//    System.setProperty(ConfVars.ZEPPELIN_INTERPRETERS.getVarName(), "org.apache.zeppelin.interpreter.mock.MockInterpreter1,org.apache.zeppelin.interpreter.mock.MockInterpreter2");
+//
+//    conf = ZeppelinConfiguration.create();
+//
+//    this.schedulerFactory = new SchedulerFactory();
+//
+//    MockInterpreter1.register("mock1", "org.apache.zeppelin.interpreter.mock.MockInterpreter1");
+//    MockInterpreter2.register("mock2", "org.apache.zeppelin.interpreter.mock.MockInterpreter2");
+//
+//    factory = new InterpreterFactory(conf, new InterpreterOption(false), null);
+//
+//    notebookRepo = new VFSNotebookRepo(conf);
+//    notebook = new Notebook(conf, notebookRepo, schedulerFactory, factory, this);
     tmpDir = new File(System.getProperty("java.io.tmpdir")+"/ZeppelinLTest_"+System.currentTimeMillis());
     tmpDir.mkdirs();
     new File(tmpDir, "conf").mkdirs();
@@ -68,11 +87,14 @@ public class NotebookTest implements JobListenerFactory{
 
     System.setProperty(ConfVars.ZEPPELIN_HOME.getVarName(), tmpDir.getAbsolutePath());
     System.setProperty(ConfVars.ZEPPELIN_NOTEBOOK_DIR.getVarName(), notebookDir.getAbsolutePath());
-    System.setProperty(ConfVars.ZEPPELIN_INTERPRETERS.getVarName(), "org.apache.zeppelin.interpreter.mock.MockInterpreter1,org.apache.zeppelin.interpreter.mock.MockInterpreter2");
+    System.setProperty(ConfVars.ZEPPELIN_INTERPRETERS.getVarName(), ConfVars.ZEPPELIN_INTERPRETERS.getStringValue());
+/// /    System.setProperty(ConfVars.ZEPPELIN_INTERPRETERS.getVarName(), "org.apache.zeppelin.flink.FlinkInterpreterStreaming");
 
     conf = ZeppelinConfiguration.create();
 
     this.schedulerFactory = new SchedulerFactory();
+
+    FlinkInterpreterStreaming.register("flinkStreaming","org.apache.zeppelin.flink.FlinkInterpreterStreaming");
 
     MockInterpreter1.register("mock1", "org.apache.zeppelin.interpreter.mock.MockInterpreter1");
     MockInterpreter2.register("mock2", "org.apache.zeppelin.interpreter.mock.MockInterpreter2");
@@ -191,6 +213,189 @@ public class NotebookTest implements JobListenerFactory{
 
     while(p2.isTerminated()==false || p2.getResult()==null) Thread.yield();
     assertEquals("repl1: p2", p2.getResult().message());
+  }
+
+  @Test
+  public void testAndIterateBitch() throws IOException, InterruptedException {
+
+    String flinkProgram = "%flinkStreaming\n" +
+            "import org.apache.flink.streaming.api.functions.co.CoFlatMapFunction\n" +
+            "import org.apache.flink.api.scala._\n" +
+            "\n" +
+            "import org.apache.flink.api.common.functions.{MapFunction, FlatMapFunction}\n" +
+            "import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment\n" +
+            "import org.apache.flink.streaming.api.scala.{ConnectedStreams, DataStream}\n" +
+            "import org.apache.flink.streaming.connectors.rabbitmq.RMQSource\n" +
+            "import org.apache.flink.streaming.util.serialization.SimpleStringSchema\n" +
+            "import org.apache.flink.util.Collector\n" +
+            "import org.json.simple.parser.JSONParser\n" +
+            "import org.json.simple.JSONObject\n" +
+            "import org.json.simple.JSONArray\n" +
+            "import org.apache.flink.contrib.streaming.scala.DataStreamUtils._\n" +
+            "import org.apache.flink.contrib.streaming.java.DataStreamIterator\n" +
+            "\n" +
+            "\n" +
+            "\n" +
+            "\n" +
+            "var data: DataStream[String] = env.addSource(new RMQSource[String](\"localhost\", \"DATA\", new SimpleStringSchema)) //FLINK_DATA\n" +
+            "\n" +
+            "    val feedback_in: DataStream[String] = env.addSource(new RMQSource[String](\"localhost\", \"mikeQueue\", new SimpleStringSchema))\n" +
+            "\n" +
+            "      val feedback: DataStream[JSONObject] = feedback_in.map{\n" +
+            "        new MapFunction[String,JSONObject]{\n" +
+            "          override def map(t: String): JSONObject = {\n" +
+            "            val parser: JSONParser = new JSONParser\n" +
+            "            val elem = parser.parse(t).asInstanceOf[JSONObject]\n" +
+            "            return(elem)\n" +
+            "          }\n" +
+            "        }\n" +
+            "      }\n" +
+            "\n" +
+            "    // downsample data:\n" +
+            "\n" +
+            "    var dataConnected: ConnectedStreams[String, JSONObject] = data.connect(feedback);\n" +
+            "    val tablerows: DataStream[String] = dataConnected.flatMap {\n" +
+            "      new CoFlatMapFunction[String, JSONObject, String] {\n" +
+            "\n" +
+            "        // downsample parameters\n" +
+            "        var passProbability: Double = 1.0\n" +
+            "\n" +
+            "        // filter by attribute\n" +
+            "        var neLat: Double = 0.0\n" +
+            "        var neLng: Double = 0.0\n" +
+            "        var swLat: Double = 0.0\n" +
+            "        var swLng: Double = 0.0\n" +
+            "\n" +
+            "        override def flatMap2(elem: JSONObject, collector: Collector[String]): Unit = {\n" +
+            "\n" +
+            "\n" +
+            "          val control = elem.get(\"control\").asInstanceOf[JSONObject]\n" +
+            "\n" +
+            "          val bounds = control.get(\"bounds\").asInstanceOf[JSONObject]\n" +
+            "\n" +
+            "          val northEast = bounds.get(\"_northEast\").asInstanceOf[JSONObject]\n" +
+            "          val southWest = bounds.get(\"_southWest\").asInstanceOf[JSONObject]\n" +
+            "\n" +
+            "          neLat = northEast.get(\"lat\").asInstanceOf[Double]\n" +
+            "          neLng = northEast.get(\"lng\").asInstanceOf[Double]\n" +
+            "\n" +
+            "          swLat = southWest.get(\"lat\").asInstanceOf[Double]\n" +
+            "          swLng = southWest.get(\"lng\").asInstanceOf[Double]\n" +
+            "\n" +
+            "          var items = elem.get(\"num_items\").asInstanceOf[Integer]\n" +
+            "\n" +
+            "          println(\"got control message!\")\n" +
+            "          println(\"nelat:\"+ neLat + \"neLng:\" + neLng + \"swLat:\" + swLat + \"swLng:\" + swLng)\n" +
+            "        }\n" +
+            "\n" +
+            "        override def flatMap1(in: String, collector: Collector[String]): Unit = {\n" +
+            "\n" +
+            "          val parser: JSONParser = new JSONParser\n" +
+            "\n" +
+            "          val elem = parser.parse(in).asInstanceOf[JSONObject]\n" +
+            "          var resString = \"\"\n" +
+            "\n" +
+            "          var entities = elem.get(\"entities\").asInstanceOf[JSONObject]\n" +
+            "          var hashtags = entities.get(\"hashtags\").asInstanceOf[JSONArray]\n" +
+            "\n" +
+            "          if (hashtags.size() > 0) {\n" +
+            "            val hashtag: JSONObject = hashtags.get(0).asInstanceOf[JSONObject]\n" +
+            "            val hashtagtext: String = hashtag.get(\"text\").asInstanceOf[String]\n" +
+            "            resString = hashtagtext\n" +
+            "          } else {\n" +
+            "            resString = \"hello\"\n" +
+            "          }\n" +
+            "\n" +
+            "          //fill location statistics\n" +
+            "          val coordinates = elem.get(\"coordinates\").asInstanceOf[JSONObject]\n" +
+            "          if (coordinates != null) {\n" +
+            "            val coordinates1: JSONArray = coordinates.get(\"coordinates\").asInstanceOf[JSONArray]\n" +
+            "\n" +
+            "            // TODO: sometin's messed up yo!\n" +
+            "            val lng: Double = coordinates1.get(0).asInstanceOf[Double]\n" +
+            "            val lat: Double = coordinates1.get(1).asInstanceOf[Double]\n" +
+            "\n" +
+            "            println(\"collecting:\" + lat + \" and \" + lng)\n" +
+            "            println(neLat + \",\" + neLng + \"; \" + swLat + \",\" + swLng)\n" +
+            "            // if its inside of boundingbox:\n" +
+            "            if (lat < neLat && lat > swLat && lng < neLng && lng > swLng) {\n" +
+            "              collector.collect(resString + \"\\t\" + lat + \"\\t\" + lng + \"\\n\")\n" +
+            "            }\n" +
+            "          }\n" +
+            "        }\n" +
+            "      }\n" +
+            "    }\n" +
+            "    \n" +
+            "    \n" +
+            "    \n" +
+            "\n";
+
+    String flinkIterator = "%flinkStreaming\n" +
+            "var it = collect(tablerows).asInstanceOf[DataStreamIterator[String]]\n" +
+            "var tableString: String = \"%table\\n\\tname\\tothervalue\\tlat\\tlng\"\n" +
+            "for(i <- 0 to 100){\n" +
+            "    var hin = it.hasImmidiateNext(1)\n" +
+            "    if(hin){\n" +
+            "        var elString = it.next\n" +
+            "        print(\"hello\" + i + \"\\t\" + elString)\n" +
+            "    }\n" +
+            "}";
+    Note note = notebook.createNote();
+//    List<Interpreter.RegisteredInterpreter> registeredInterpreterList = factory.getRegisteredInterpreterList();
+
+//    note.getNoteReplLoader().setInterpreters(registeredInterpreterList);//factory.getRegisteredInterpreterList());
+//    Paragraph p1 = note.addParagraph();
+//    p1.setText(flinkProgram);
+//    Paragraph p2 = note.addParagraph();
+//    p2.setText(flinkIterator);
+//    assertEquals(null, p2.getResult());
+//    note.runAll();
+    Paragraph p1 = note.addParagraph();
+    p1.setText(flinkProgram);
+    Paragraph p2 = note.addParagraph();
+    p2.setText(flinkIterator);
+//    p1.run();
+//    p2.run();
+
+    note.runAll();
+
+//    Paragraph paragraph = note.addParagraph();
+//    paragraph.setText("%flinkStreaming\n" +
+//                      "var els = env.fromElements(\"a\",\"b\")\n" +
+//                      "els.print\n" +
+//                      "env.execute()");
+//    paragraph.run();
+//
+//    boolean running = paragraph.isRunning();
+//    boolean terminated = paragraph.isTerminated();
+//    InterpreterResult result = paragraph.getResult();
+
+    boolean running22 = p2.isRunning();
+    boolean terminated22 = p2.isTerminated();
+    InterpreterResult result22 = p2.getResult();
+
+
+    boolean running32 = p1.isRunning();
+    boolean terminated32 = p1.isTerminated();
+    InterpreterResult result32 = p1.getResult();
+    while(p2.isRunning() == true || p2.getResult() == null) {
+
+      boolean running2 = p2.isRunning();
+      boolean terminated2 = p2.isTerminated();
+      InterpreterResult result2 = p2.getResult();
+
+
+      boolean running3 = p1.isRunning();
+      boolean terminated3 = p1.isTerminated();
+      InterpreterResult result3 = p1.getResult();
+
+      Thread.yield();
+    }
+
+    System.out.println(p2.getResult().message());
+//    while(p2.isTerminated()==false || p2.getResult()==null) Thread.yield();
+//    assertEquals("repl1: p2", p2.getResult().message());
+
   }
 
   @Test

@@ -165,6 +165,8 @@ public class InterpreterFactory {
             boolean found = false;
             Properties p = new Properties();
             for (RegisteredInterpreter info : infos) {
+              String className1 = info.getClassName();
+              boolean equals = info.getClassName().equals(className);
               if (found == false && info.getClassName().equals(className)) {
                 found = true;
               }

@@ -253,8 +253,9 @@ public class FlinkInterpreterStreaming extends Interpreter {
     }
     linesToRun[lines.length] = "print(\"\")";
 
-    System.setOut(new PrintStream(out));
-    out.reset();
+    PrintStream oldOut = System.out;
+    System.setOut(new PrintStream(this.out));
+    this.out.reset();
     Code r = null;
 
     String incomplete = "";
@@ -288,8 +289,9 @@ public class FlinkInterpreterStreaming extends Interpreter {
 
       r = getResultCode(res);
 
+      System.setOut(oldOut);
       if (r == Code.ERROR) {
-        return new InterpreterResult(r, out.toString());
+        return new InterpreterResult(r, this.out.toString());
       } else if (r == Code.INCOMPLETE) {
         incomplete += s + "\n";
       } else {
@@ -300,7 +302,7 @@ public class FlinkInterpreterStreaming extends Interpreter {
     if (r == Code.INCOMPLETE) {
       return new InterpreterResult(r, "Incomplete expression");
     } else {
-      return new InterpreterResult(r, out.toString());
+      return new InterpreterResult(r, this.out.toString());
     }
   }
 
