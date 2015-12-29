@@ -51,9 +51,16 @@ public class FlinkInterpreterStreamingTest {
 
   @Test
   public void testSimpleStatement() {
+    PrintStream outOld = System.out;
+
     InterpreterResult result = flink.interpret("val a=1", context);
     result = flink.interpret("print(a)", context);
     assertEquals("1", result.message());
+    System.setOut(outOld);
+    System.out.println("INTERPRETER RESULT ITERATOR ITERATION:::://");
+    System.out.println("code:\n" + result.code());
+    System.out.println("msg:\n" + result.message());
+
   }
 
 

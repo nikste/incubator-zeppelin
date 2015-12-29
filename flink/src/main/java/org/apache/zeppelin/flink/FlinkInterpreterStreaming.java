@@ -46,7 +46,7 @@ import java.util.Properties;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Interpreter for Apache Flink (http://flink.apache.org)
+ * Interpreter for Apache Flink (http://flink.apache.org).
  */
 public class FlinkInterpreterStreaming extends Interpreter {
   Logger logger = LoggerFactory.getLogger(FlinkInterpreterStreaming.class);
@@ -108,7 +108,7 @@ public class FlinkInterpreterStreaming extends Interpreter {
 
     imain = flinkIloop.intp();
 
-    org.apache.flink.streaming.api.scala.StreamExecutionEnvironment env =
+    StreamExecutionEnvironment env =
             (StreamExecutionEnvironment) flinkIloop.scalaEnv();
 
     env.getConfig().disableSysoutLogging();
@@ -253,9 +253,8 @@ public class FlinkInterpreterStreaming extends Interpreter {
     }
     linesToRun[lines.length] = "print(\"\")";
 
-    PrintStream oldOut = System.out;
-    System.setOut(new PrintStream(this.out));
-    this.out.reset();
+    System.setOut(new PrintStream(out));
+    out.reset();
     Code r = null;
 
     String incomplete = "";
@@ -275,13 +274,14 @@ public class FlinkInterpreterStreaming extends Interpreter {
       Results.Result res = null;
       try {
         res = Console.withOut(
-            System.out,
-            new AbstractFunction0<Results.Result>() {
+          System.out,
+          new AbstractFunction0<Results.Result>() {
             @Override
             public Results.Result apply() {
               return imain.interpret(currentCommand + s);
             }
-          });
+          }
+        );
       } catch (Exception e) {
         logger.info("Interpreter exception", e);
         return new InterpreterResult(Code.ERROR, InterpreterUtils.getMostRelevantMessage(e));
@@ -289,9 +289,8 @@ public class FlinkInterpreterStreaming extends Interpreter {
 
       r = getResultCode(res);
 
-      System.setOut(oldOut);
       if (r == Code.ERROR) {
-        return new InterpreterResult(r, this.out.toString());
+        return new InterpreterResult(r, out.toString());
       } else if (r == Code.INCOMPLETE) {
         incomplete += s + "\n";
       } else {
@@ -302,7 +301,7 @@ public class FlinkInterpreterStreaming extends Interpreter {
     if (r == Code.INCOMPLETE) {
       return new InterpreterResult(r, "Incomplete expression");
     } else {
-      return new InterpreterResult(r, this.out.toString());
+      return new InterpreterResult(r, out.toString());
     }
   }
 

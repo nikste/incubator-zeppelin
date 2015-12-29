@@ -24,6 +24,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Properties;
 
@@ -51,9 +52,14 @@ public class FlinkInterpreterTest {
 
   @Test
   public void testSimpleStatement() {
+    PrintStream outOld = System.out;
     InterpreterResult result = flink.interpret("val a=1", context);
     result = flink.interpret("print(a)", context);
     assertEquals("1", result.message());
+    System.setOut(outOld);
+    System.out.println("INTERPRETER RESULT ITERATOR ITERATION:::://");
+    System.out.println("code:\n" + result.code());
+    System.out.println("msg:\n" + result.message());
   }
 
   @Test
