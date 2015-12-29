@@ -52,6 +52,163 @@
 
   <dependencies>
 
+      <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+      </dependency>
+
+      <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+      </dependency>
+
+      <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>zeppelin-interpreter</artifactId>
+          <version>${project.version}</version>
+          <scope>provided</scope>
+      </dependency>
+
+      <dependency>
+          <groupId>com.google.code.gson</groupId>
+          <artifactId>gson</artifactId>
+      </dependency>
+
+      <dependency>
+          <groupId>org.apache.flink</groupId>
+          <artifactId>flink-core</artifactId>
+          <version>${flink.version}</version>
+
+      </dependency>
+
+      <dependency>
+          <groupId>org.apache.flink</groupId>
+          <artifactId>flink-clients</artifactId>
+          <version>${flink.version}</version>
+
+      </dependency>
+
+      <dependency>
+          <groupId>org.apache.flink</groupId>
+          <artifactId>flink-runtime</artifactId>
+          <version>${flink.version}</version>
+
+          <!--</exclusions>-->
+      </dependency>
+
+      <dependency>
+          <groupId>org.apache.flink</groupId>
+          <artifactId>flink-scala</artifactId>
+          <version>${flink.version}</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.apache.flink</groupId>
+          <artifactId>flink-scala-shell</artifactId>
+          <version>${flink.version}</version>
+      </dependency>
+
+      <dependency>
+          <groupId>com.typesafe.akka</groupId>
+          <artifactId>akka-actor_${flink.scala.binary.version}</artifactId>
+          <version>${flink.akka.version}</version>
+      </dependency>
+
+      <dependency>
+          <groupId>com.typesafe.akka</groupId>
+          <artifactId>akka-remote_${flink.scala.binary.version}</artifactId>
+          <version>${flink.akka.version}</version>
+      </dependency>
+
+      <dependency>
+          <groupId>com.typesafe.akka</groupId>
+          <artifactId>akka-slf4j_${flink.scala.binary.version}</artifactId>
+          <version>${flink.akka.version}</version>
+      </dependency>
+
+      <dependency>
+          <groupId>com.typesafe.akka</groupId>
+          <artifactId>akka-testkit_${flink.scala.binary.version}</artifactId>
+          <version>${flink.akka.version}</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.scala-lang</groupId>
+          <artifactId>scala-library</artifactId>
+          <version>${flink.scala.version}</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.scala-lang</groupId>
+          <artifactId>scala-compiler</artifactId>
+          <version>${flink.scala.version}</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.scala-lang</groupId>
+          <artifactId>scala-reflect</artifactId>
+          <version>${flink.scala.version}</version>
+      </dependency>
+
+      <dependency>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+          <scope>test</scope>
+      </dependency>
+
+      <dependency>
+          <groupId>org.apache.flink</groupId>
+          <artifactId>flink-streaming-scala</artifactId>
+          <version>${flink.version}</version>
+          <!--<exclusions>-->
+              <!--<exclusion>-->
+                  <!--<groupId>org.apache.avro</groupId>-->
+                  <!--<artifactId>avro</artifactId>-->
+              <!--</exclusion>-->
+              <!--&lt;!&ndash;<exclusion>&ndash;&gt;-->
+                  <!--&lt;!&ndash;<groupId>com.esotericsoftware.kryo</groupId>&ndash;&gt;-->
+                  <!--&lt;!&ndash;<artifactId>kryo</artifactId>&ndash;&gt;-->
+              <!--&lt;!&ndash;</exclusion>&ndash;&gt;-->
+              <!--<exclusion>-->
+                  <!--<groupId>com.fasterxml.jackson.core</groupId>-->
+                  <!--<artifactId>jackson-databind</artifactId>-->
+              <!--</exclusion>-->
+              <!--<exclusion>-->
+                  <!--<groupId>joda-time</groupId>-->
+                  <!--<artifactId>joda-time</artifactId>-->
+              <!--</exclusion>-->
+              <!--<exclusion>-->
+                  <!--<groupId>org.scala-lang</groupId>-->
+                  <!--<artifactId>scala-library</artifactId>-->
+              <!--</exclusion>-->
+              <!--<exclusion>-->
+                  <!--<groupId>io.netty</groupId>-->
+                  <!--<artifactId>netty</artifactId>-->
+              <!--</exclusion>-->
+          <!--</exclusions>-->
+
+      </dependency>
+
+      <dependency>
+          <groupId>org.apache.flink</groupId>
+          <artifactId>flink-streaming-contrib</artifactId>
+          <version>${flink.version}</version>
+          <!--<scope>provided</scope>-->
+      </dependency>
+
+      <dependency>
+          <groupId>org.apache.flink</groupId>
+          <artifactId>flink-connector-rabbitmq</artifactId>
+          <version>${flink.version}</version>
+          <!--<scope>provided</scope>-->
+      </dependency>
+
+      <dependency>
+          <groupId>org.apache.flink</groupId>
+          <artifactId>flink-connector-twitter</artifactId>
+          <version>${flink.version}</version>
+      </dependency>
+
     <dependency>
       <groupId>com.googlecode.json-simple</groupId>
       <artifactId>json-simple</artifactId>
@@ -64,133 +221,133 @@
       <version>1.5</version>
     </dependency>
 
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.slf4j</groupId>-->
+      <!--<artifactId>slf4j-api</artifactId>-->
+    <!--</dependency>-->
 
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.slf4j</groupId>-->
+      <!--<artifactId>slf4j-log4j12</artifactId>-->
+    <!--</dependency>-->
 
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>zeppelin-interpreter</artifactId>
-      <version>${project.version}</version>
-      <scope>provided</scope>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>${project.groupId}</groupId>-->
+      <!--<artifactId>zeppelin-interpreter</artifactId>-->
+      <!--<version>${project.version}</version>-->
+      <!--<scope>provided</scope>-->
+    <!--</dependency>-->
 
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-core</artifactId>
-      <version>${flink.version}</version>
-        <scope>provided</scope>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.apache.flink</groupId>-->
+      <!--<artifactId>flink-core</artifactId>-->
+      <!--<version>${flink.version}</version>-->
+        <!--<scope>provided</scope>-->
+    <!--</dependency>-->
 
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-clients</artifactId>
-      <version>${flink.version}</version>
-        <scope>provided</scope>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.apache.flink</groupId>-->
+      <!--<artifactId>flink-clients</artifactId>-->
+      <!--<version>${flink.version}</version>-->
+        <!--<scope>provided</scope>-->
+    <!--</dependency>-->
 
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-runtime</artifactId>
-      <version>${flink.version}</version>
-        <scope>provided</scope>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.apache.flink</groupId>-->
+      <!--<artifactId>flink-runtime</artifactId>-->
+      <!--<version>${flink.version}</version>-->
+        <!--<scope>provided</scope>-->
+    <!--</dependency>-->
 
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-streaming-scala</artifactId>
-      <version>${flink.version}</version>
-        <scope>provided</scope>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.apache.flink</groupId>-->
+      <!--<artifactId>flink-streaming-scala</artifactId>-->
+      <!--<version>${flink.version}</version>-->
+        <!--<scope>provided</scope>-->
+    <!--</dependency>-->
 
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-streaming-contrib</artifactId>
-      <version>${flink.version}</version>
-        <scope>provided</scope>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.apache.flink</groupId>-->
+      <!--<artifactId>flink-streaming-contrib</artifactId>-->
+      <!--<version>${flink.version}</version>-->
+        <!--<scope>provided</scope>-->
+    <!--</dependency>-->
 
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-scala</artifactId>
-      <version>${flink.version}</version>
-        <scope>provided</scope>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.apache.flink</groupId>-->
+      <!--<artifactId>flink-scala</artifactId>-->
+      <!--<version>${flink.version}</version>-->
+        <!--<scope>provided</scope>-->
+    <!--</dependency>-->
 
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-scala-shell</artifactId>
-      <version>${flink.version}</version>
-        <scope>provided</scope>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.apache.flink</groupId>-->
+      <!--<artifactId>flink-scala-shell</artifactId>-->
+      <!--<version>${flink.version}</version>-->
+        <!--<scope>provided</scope>-->
+    <!--</dependency>-->
 
-    <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-actor_${flink.scala.binary.version}</artifactId>
-      <version>${flink.akka.version}</version>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>com.typesafe.akka</groupId>-->
+      <!--<artifactId>akka-actor_${flink.scala.binary.version}</artifactId>-->
+      <!--<version>${flink.akka.version}</version>-->
+    <!--</dependency>-->
 
-    <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-remote_${flink.scala.binary.version}</artifactId>
-      <version>${flink.akka.version}</version>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>com.typesafe.akka</groupId>-->
+      <!--<artifactId>akka-remote_${flink.scala.binary.version}</artifactId>-->
+      <!--<version>${flink.akka.version}</version>-->
+    <!--</dependency>-->
 
-    <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-slf4j_${flink.scala.binary.version}</artifactId>
-      <version>${flink.akka.version}</version>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>com.typesafe.akka</groupId>-->
+      <!--<artifactId>akka-slf4j_${flink.scala.binary.version}</artifactId>-->
+      <!--<version>${flink.akka.version}</version>-->
+    <!--</dependency>-->
 
-    <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-testkit_${flink.scala.binary.version}</artifactId>
-      <version>${flink.akka.version}</version>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>com.typesafe.akka</groupId>-->
+      <!--<artifactId>akka-testkit_${flink.scala.binary.version}</artifactId>-->
+      <!--<version>${flink.akka.version}</version>-->
+    <!--</dependency>-->
 
-    <dependency>
-      <groupId>org.scala-lang</groupId>
-      <artifactId>scala-library</artifactId>
-      <version>${flink.scala.version}</version>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.scala-lang</groupId>-->
+      <!--<artifactId>scala-library</artifactId>-->
+      <!--<version>${flink.scala.version}</version>-->
+    <!--</dependency>-->
 
-    <dependency>
-      <groupId>org.scala-lang</groupId>
-      <artifactId>scala-compiler</artifactId>
-      <version>${flink.scala.version}</version>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.scala-lang</groupId>-->
+      <!--<artifactId>scala-compiler</artifactId>-->
+      <!--<version>${flink.scala.version}</version>-->
+    <!--</dependency>-->
 
-    <dependency>
-      <groupId>org.scala-lang</groupId>
-      <artifactId>scala-reflect</artifactId>
-      <version>${flink.scala.version}</version>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.scala-lang</groupId>-->
+      <!--<artifactId>scala-reflect</artifactId>-->
+      <!--<version>${flink.scala.version}</version>-->
+    <!--</dependency>-->
 
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>junit</groupId>-->
+      <!--<artifactId>junit</artifactId>-->
+      <!--<scope>test</scope>-->
+    <!--</dependency>-->
 
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-connector-rabbitmq</artifactId>
-      <version>${flink.version}</version>
-        <scope>provided</scope>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.apache.flink</groupId>-->
+      <!--<artifactId>flink-connector-rabbitmq</artifactId>-->
+      <!--<version>${flink.version}</version>-->
+        <!--<scope>provided</scope>-->
+    <!--</dependency>-->
 
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-connector-twitter</artifactId>
-      <version>${flink.version}</version>
-        <scope>provided</scope>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.apache.flink</groupId>-->
+      <!--<artifactId>flink-connector-twitter</artifactId>-->
+      <!--<version>${flink.version}</version>-->
+        <!--<scope>provided</scope>-->
+    <!--</dependency>-->
 
   </dependencies>
   <build>
