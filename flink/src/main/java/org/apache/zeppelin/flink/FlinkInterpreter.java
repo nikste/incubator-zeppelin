@@ -94,15 +94,21 @@ public class FlinkInterpreter extends Interpreter {
     if (localMode()) {
       startFlinkMiniCluster();
     }
-
-    flinkIloop = new FlinkILoop(getHost(), getPort(), (BufferedReader) null, new PrintWriter(out));
+    Configuration conf = new Configuration();
+    flinkIloop = new FlinkILoop(getHost(),
+            getPort(),
+            conf,
+            (BufferedReader) null,
+            new PrintWriter(out));
     flinkIloop.settings_$eq(createSettings());
     flinkIloop.createInterpreter();
     
     imain = flinkIloop.intp();
 
-    org.apache.flink.api.scala.ExecutionEnvironment env = flinkIloop.scalaEnv();
-    env.getConfig().disableSysoutLogging();
+    org.apache.flink.api.scala.ExecutionEnvironment benv = flinkIloop.scalaBenv();
+    benv.getConfig().disableSysoutLogging();
+    org.apache.flink.streaming.api.scala.StreamExecutionEnvironment senv = flinkIloop.scalaSenv();
+    senv.getConfig().disableSysoutLogging();
 
     // prepare bindings
     imain.interpret("@transient var _binder = new java.util.HashMap[String, Object]()");
@@ -115,7 +121,12 @@ public class FlinkInterpreter extends Interpreter {
     
     imain.interpret("import org.apache.flink.api.scala._");
     imain.interpret("import org.apache.flink.api.common.functions._");
-    imain.bindValue("env", env);
+
+    imain.interpret("import org.apache.flink.streaming.api.scala._");
+    imain.interpret("import org.apache.flink.streaming.api.windowing.time._");
+    
+    imain.bindValue("benv", benv);
+    imain.bindValue("senv", senv);
   }
 
   private boolean localMode() {
